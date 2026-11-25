@@ -13,7 +13,8 @@ main	LDA	#str
 
 	JSUB	nl
 
-	+LDA	#12345
+	+LDA	#0
+	SUB	#12
 	JSUB	num
 
 	JSUB	nl
@@ -74,7 +75,7 @@ else	RMO	A, S
 	LDA	#45
 	WD	#1
 	RMO	S, A
-	MUL	#-1
+	MUL	=-1
 
 . number is in A
 nloop	COMP	#0
