@@ -114,7 +114,7 @@ public class Machine {
 
     public double getFloat(int addr) { throw new UnsupportedOperationException("Float not implemented"); }
     public void setFloat(int addr, double val) { throw new UnsupportedOperationException("Float not implemented"); }
-    
+
     // ==========================================
 
     // ================= Devices =================
@@ -134,6 +134,26 @@ public class Machine {
         deviceCheck(num);
         devices[num] = device;
     }
-    
+
     // ===========================================
+
+    // ================= Errors =================
+
+    private void error(String msg) {
+        System.err.printf("Error at PC=0x%06X: %s%n", PC, msg);
+    }
+
+    private void notImplemented(String mnemonic) {
+        error("instruction not implemented: " + mnemonic);
+    }
+
+    private void invalidOpcode(int opcode) {
+        error(String.format("invalid opcode 0x%02X", opcode));
+    }
+
+    private void invalidAddressing() {
+        error("invalid addressing mode");
+    }
+
+    // ==========================================
 }
