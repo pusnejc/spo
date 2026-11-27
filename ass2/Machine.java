@@ -1,4 +1,4 @@
-package spo.ass2;
+package ass2;
 
 public class Machine {
 
