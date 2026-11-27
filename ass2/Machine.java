@@ -6,6 +6,11 @@ public class Machine {
     public static final int MAX_DEVICES = 256;
     public static final int WORD_MASK = 0xFFFFFF;
     public static final int BYTE_MASK = 0xFF;
+    public static final int NIBBLE_MASK = 0xF;
+    public static final int CC_MASK = 0xC0;
+    public static final int CC_LT = 0x00;
+    public static final int CC_EQ = 0x40;
+    public static final int CC_GT = 0x80;
     private int A, X, L, B, S, T, PC, SW;
     private double F;
     private final byte[] memory;
@@ -76,6 +81,21 @@ public class Machine {
             default ->
                 throw new IllegalArgumentException("Register does not exist: " + reg);
         }
+    }
+
+    private void setCC(int cmp) {
+        int cc = cmp < 0 ? CC_LT : cmp == 0 ? CC_EQ : CC_GT;
+        SW = (SW & ~CC_MASK) | cc;
+    }
+
+    private int getCC() { return SW & CC_MASK; }
+    private boolean isLess() { return getCC() == CC_LT; }
+    private boolean isEqual() { return getCC() == CC_EQ; }
+    private boolean isGreater() { return getCC() == CC_GT; }
+
+    // interprets a 24-bit word as a signed (two's complement) value.
+    public static int signed(int val) {
+        return (val << 8) >> 8;
     }
 
     // ===========================================
@@ -156,4 +176,73 @@ public class Machine {
     }
 
     // ==========================================
+
+    // ================ Execution ================
+
+    private int fetch() {
+        int pcValue = getPC();
+        int nextByte = getByte(pcValue);
+        setPC(pcValue + 1);
+        return nextByte;
+    }
+
+    public void execute() {
+        int fstByte = fetch();
+
+        if (execF1(fstByte)) return;
+
+        int sndByte = fetch();
+
+        if (execF2(fstByte, sndByte)) return;
+    }
+
+    private boolean execF1(int opcode) {
+        switch (opcode) {
+            case Opcode.FIX, Opcode.FLOAT, Opcode.NORM,
+                Opcode.SIO, Opcode.HIO, Opcode.TIO -> notImplemented(Opcode.mnemonic(opcode));
+            default -> { return false; }
+        }
+        return true;
+    }
+
+    private boolean execF2(int opcode, int operand) {
+        int r1 = (operand >>> 4) & NIBBLE_MASK;
+        int r2 = operand & NIBBLE_MASK;
+        switch (opcode) {
+            case Opcode.ADDR -> setReg(r2, getReg(r2) + getReg(r1));
+            case Opcode.CLEAR -> setReg(r1, 0);
+            case Opcode.COMPR -> setCC(Integer.compare(signed(getReg(r1)), signed(getReg(r2))));
+            case Opcode.DIVR -> {
+                int divisor = signed(getReg(r1));
+                if (divisor == 0) {
+                    error("division by zero");
+                } else {
+                    setReg(r2, signed(getReg(r2)) / divisor);
+                }
+            }
+            case Opcode.MULR -> setReg(r2, getReg(r2) * getReg(r1));
+            case Opcode.RMO -> setReg(r2, getReg(r1));
+            case Opcode.SHIFTL -> {
+                int n = r2 + 1;
+                int val = getReg(r1);
+                setReg(r1, (val << n) | (val >>> (24 - n)));
+            }
+            case Opcode.SHIFTR -> {
+                int n = r2 + 1;
+                int val = signed(getReg(r1));
+                setReg(r1, val >> n);
+            }
+            case Opcode.SUBR -> setReg(r2, getReg(r2) - getReg(r1));
+            case Opcode.SVC -> notImplemented(Opcode.mnemonic(opcode));
+            case Opcode.TIXR -> {
+                int newX = getX() + 1;
+                setX(newX);
+                setCC(Integer.compare(signed(newX), signed(getReg(r1))));
+            }
+            default -> { return false; }
+        }
+        return true;
+    }
+
+    // ===========================================
 }
