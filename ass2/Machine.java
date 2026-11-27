@@ -3,9 +3,11 @@ package ass2;
 public class Machine {
 
     public static final int MAX_ADDRESS = 1048575;  // 1 MB - 1
-    private static final int WORD_MASK = 0xFFFFFF;
-    private static final int BYTE_MASK = 0xFF;
+    public static final int MAX_DEVICES = 256;
+    public static final int WORD_MASK = 0xFFFFFF;
+    public static final int BYTE_MASK = 0xFF;
     private final byte[] memory;
+    private final Device[] devices;
     private int A, X, L, B, S, T, PC, SW;
     private double F;
 
@@ -13,33 +15,56 @@ public class Machine {
         A = X = L = B = S = T = PC = SW = 0;
         F = 0.0;
         memory = new byte[MAX_ADDRESS + 1];
+        devices = new Device[MAX_DEVICES];
+        devices[0] = new InputDevice(System.in);
+        devices[1] = new OutputDevice(System.out);
+        devices[2] = new OutputDevice(System.err);
+        for (int i = 3; i < MAX_DEVICES; i++) {
+            devices[i] = new FileDevice(String.format("%02X.dev", i));
+        }
     }
 
-    private static void addrOutOfBoundsCheck(int addr) {
+    private static void deviceCheck(int num) {
+        if (num < 0 || num >= MAX_DEVICES) {
+            throw new IllegalArgumentException("Device does not exist: " + num);
+        }
+    }
+
+    public Device getDevice(int num) {
+        deviceCheck(num);
+        return devices[num];
+    }
+
+    public void setDevice(int num, Device device) {
+        deviceCheck(num);
+        devices[num] = device;
+    }
+
+    private static void addrCheck(int addr) {
         if (addr < 0 || addr > MAX_ADDRESS) {
             throw new IllegalArgumentException("Address out of bounds: " + addr);
         }
     }
 
     public int getByte(int addr) {
-        addrOutOfBoundsCheck(addr);
+        addrCheck(addr);
         return memory[addr] & BYTE_MASK;
     }
 
     public void setByte(int addr, int val) {
-        addrOutOfBoundsCheck(addr);
+        addrCheck(addr);
         memory[addr] = (byte) (val & BYTE_MASK);
     }
 
     public int getWord(int addr) {
-        addrOutOfBoundsCheck(addr);
-        addrOutOfBoundsCheck(addr + 2);
+        addrCheck(addr);
+        addrCheck(addr + 2);
         return (memory[addr] & BYTE_MASK) << 16 | (memory[addr + 1] & BYTE_MASK) << 8 | (memory[addr + 2] & BYTE_MASK);
     }
 
     public void setWord(int addr, int val) {
-        addrOutOfBoundsCheck(addr);
-        addrOutOfBoundsCheck(addr + 2);
+        addrCheck(addr);
+        addrCheck(addr + 2);
         memory[addr] = (byte) ((val >>> 16) & BYTE_MASK);
         memory[addr + 1] = (byte) ((val >>> 8) & BYTE_MASK);
         memory[addr + 2] = (byte) (val & BYTE_MASK);
