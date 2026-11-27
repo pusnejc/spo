@@ -6,10 +6,10 @@ public class Machine {
     public static final int MAX_DEVICES = 256;
     public static final int WORD_MASK = 0xFFFFFF;
     public static final int BYTE_MASK = 0xFF;
-    private final byte[] memory;
-    private final Device[] devices;
     private int A, X, L, B, S, T, PC, SW;
     private double F;
+    private final byte[] memory;
+    private final Device[] devices;
 
     public Machine() {
         A = X = L = B = S = T = PC = SW = 0;
@@ -24,54 +24,7 @@ public class Machine {
         }
     }
 
-    private static void deviceCheck(int num) {
-        if (num < 0 || num >= MAX_DEVICES) {
-            throw new IllegalArgumentException("Device does not exist: " + num);
-        }
-    }
-
-    public Device getDevice(int num) {
-        deviceCheck(num);
-        return devices[num];
-    }
-
-    public void setDevice(int num, Device device) {
-        deviceCheck(num);
-        devices[num] = device;
-    }
-
-    private static void addrCheck(int addr) {
-        if (addr < 0 || addr > MAX_ADDRESS) {
-            throw new IllegalArgumentException("Address out of bounds: " + addr);
-        }
-    }
-
-    public int getByte(int addr) {
-        addrCheck(addr);
-        return memory[addr] & BYTE_MASK;
-    }
-
-    public void setByte(int addr, int val) {
-        addrCheck(addr);
-        memory[addr] = (byte) (val & BYTE_MASK);
-    }
-
-    public int getWord(int addr) {
-        addrCheck(addr);
-        addrCheck(addr + 2);
-        return (memory[addr] & BYTE_MASK) << 16 | (memory[addr + 1] & BYTE_MASK) << 8 | (memory[addr + 2] & BYTE_MASK);
-    }
-
-    public void setWord(int addr, int val) {
-        addrCheck(addr);
-        addrCheck(addr + 2);
-        memory[addr] = (byte) ((val >>> 16) & BYTE_MASK);
-        memory[addr + 1] = (byte) ((val >>> 8) & BYTE_MASK);
-        memory[addr + 2] = (byte) (val & BYTE_MASK);
-    }
-
-    public double getFloat(int addr) { throw new UnsupportedOperationException("Float not implemented"); }
-    public void setFloat(int addr, double val) { throw new UnsupportedOperationException("Float not implemented"); }
+    // ================ Registers ================
 
     public int getA() { return A; }
     public int getX() { return X; }
@@ -124,4 +77,63 @@ public class Machine {
                 throw new IllegalArgumentException("Register does not exist: " + reg);
         }
     }
+
+    // ===========================================
+
+    // ================= Memory =================
+
+    private static void addrCheck(int addr) {
+        if (addr < 0 || addr > MAX_ADDRESS) {
+            throw new IllegalArgumentException("Address out of bounds: " + addr);
+        }
+    }
+
+    public int getByte(int addr) {
+        addrCheck(addr);
+        return memory[addr] & BYTE_MASK;
+    }
+
+    public void setByte(int addr, int val) {
+        addrCheck(addr);
+        memory[addr] = (byte) (val & BYTE_MASK);
+    }
+
+    public int getWord(int addr) {
+        addrCheck(addr);
+        addrCheck(addr + 2);
+        return (memory[addr] & BYTE_MASK) << 16 | (memory[addr + 1] & BYTE_MASK) << 8 | (memory[addr + 2] & BYTE_MASK);
+    }
+
+    public void setWord(int addr, int val) {
+        addrCheck(addr);
+        addrCheck(addr + 2);
+        memory[addr] = (byte) ((val >>> 16) & BYTE_MASK);
+        memory[addr + 1] = (byte) ((val >>> 8) & BYTE_MASK);
+        memory[addr + 2] = (byte) (val & BYTE_MASK);
+    }
+
+    public double getFloat(int addr) { throw new UnsupportedOperationException("Float not implemented"); }
+    public void setFloat(int addr, double val) { throw new UnsupportedOperationException("Float not implemented"); }
+    
+    // ==========================================
+
+    // ================= Devices =================
+
+    private static void deviceCheck(int num) {
+        if (num < 0 || num >= MAX_DEVICES) {
+            throw new IllegalArgumentException("Device does not exist: " + num);
+        }
+    }
+
+    public Device getDevice(int num) {
+        deviceCheck(num);
+        return devices[num];
+    }
+
+    public void setDevice(int num, Device device) {
+        deviceCheck(num);
+        devices[num] = device;
+    }
+    
+    // ===========================================
 }
