@@ -67,4 +67,72 @@ public final class Opcode {
     public static final int TD    = 0xE0;
     public static final int TIX   = 0x2C;
     public static final int WD    = 0xDC;
+
+    public static String mnemonic(int opcode) {
+        return switch (opcode) {
+            // F1
+            case FIX    -> "FIX";
+            case FLOAT  -> "FLOAT";
+            case HIO    -> "HIO";
+            case NORM   -> "NORM";
+            case SIO    -> "SIO";
+            case TIO    -> "TIO";
+            // F2
+            case ADDR   -> "ADDR";
+            case CLEAR  -> "CLEAR";
+            case COMPR  -> "COMPR";
+            case DIVR   -> "DIVR";
+            case MULR   -> "MULR";
+            case RMO    -> "RMO";
+            case SHIFTL -> "SHIFTL";
+            case SHIFTR -> "SHIFTR";
+            case SUBR   -> "SUBR";
+            case SVC    -> "SVC";
+            case TIXR   -> "TIXR";
+            // F3/4
+            case ADD    -> "ADD";
+            case ADDF   -> "ADDF";
+            case AND    -> "AND";
+            case COMP   -> "COMP";
+            case COMPF  -> "COMPF";
+            case DIV    -> "DIV";
+            case DIVF   -> "DIVF";
+            case J      -> "J";
+            case JEQ    -> "JEQ";
+            case JGT    -> "JGT";
+            case JLT    -> "JLT";
+            case JSUB   -> "JSUB";
+            case LDA    -> "LDA";
+            case LDB    -> "LDB";
+            case LDCH   -> "LDCH";
+            case LDF    -> "LDF";
+            case LDL    -> "LDL";
+            case LDS    -> "LDS";
+            case LDT    -> "LDT";
+            case LDX    -> "LDX";
+            case LPS    -> "LPS";
+            case MUL    -> "MUL";
+            case MULF   -> "MULF";
+            case OR     -> "OR";
+            case RD     -> "RD";
+            case RSUB   -> "RSUB";
+            case SSK    -> "SSK";
+            case STA    -> "STA";
+            case STB    -> "STB";
+            case STCH   -> "STCH";
+            case STF    -> "STF";
+            case STI    -> "STI";
+            case STL    -> "STL";
+            case STS    -> "STS";
+            case STSW   -> "STSW";
+            case STT    -> "STT";
+            case STX    -> "STX";
+            case SUB    -> "SUB";
+            case SUBF   -> "SUBF";
+            case TD     -> "TD";
+            case TIX    -> "TIX";
+            case WD     -> "WD";
+            default     -> String.format("0x%02X", opcode);
+        };
+    }
 }
